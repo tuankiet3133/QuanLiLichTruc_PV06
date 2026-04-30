@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống PV06 - Pro v4.0</title>
+    <title>Hệ Thống PV06 - Pro v4.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -34,7 +34,7 @@
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
-    <div id="loader" class="fixed inset-0 bg-white/90 z-[9999] flex flex-col items-center justify-center hidden">
+    <div id="loader" class="fixed inset-0 bg-white/80 z-[9999] flex flex-col items-center justify-center hidden">
         <div class="loader mb-3"></div>
         <p class="font-black text-blue-900 italic">Đang đồng bộ nghiệp vụ PV06...</p>
     </div>
@@ -69,7 +69,7 @@
                 <h3 class="font-bold uppercase text-lg">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
                 <h4 class="font-bold text-md">Độc lập - Tự do - Hạnh phúc</h4>
                 <div class="w-32 h-px bg-black mx-auto mt-1"></div>
-                <h2 id="printTitle" class="mt-6 font-black text-2xl uppercase italic">LỊCH TRỰC TUẦN</h2>
+                <h2 id="printTitle" class="mt-6 font-black text-2xl uppercase ">LỊCH TRỰC TUẦN</h2>
                 <p id="printTimeRange" class="italic font-bold text-lg mt-1"></p>
             </div>
             <div class="flex flex-wrap items-center gap-4 mb-10 no-print bg-blue-50 p-6 rounded-3xl border-2 border-blue-100">
@@ -115,16 +115,23 @@
                             <option value="">-- Cấp bậc --</option>
                             <option value="Thượng tá">Thượng tá</option><option value="Trung tá">Trung tá</option><option value="Thiếu tá">Thiếu tá</option><option value="Đại úy">Đại úy</option><option value="Thượng úy">Thượng úy</option><option value="Trung úy">Trung úy</option><option value="Thiếu úy">Thiếu úy</option>
                         </select>
-                        <input id="cbPos" class="p-4 border-2 rounded-2xl font-bold text-base" placeholder="Chức vụ">
+                        <select id="cbPos" class="p-4 border-2 rounded-2xl font-bold bg-white text-base">
+                            <option value="">-- Chức vụ --</option>
+                            <option value="Trưởng Phòng">Trưởng Phòng</option>
+                            <option value="Phó Trưởng Phòng">Phó Trưởng Phòng</option>
+                            <option value="Đội Trưởng">Đội Trưởng</option>
+                            <option value="Phó Đội Trưởng">Phó Đội Trưởng</option>
+                            <option value="Cán Bộ">Cán Bộ</option>
+                        </select>
                         <select id="cbGroup" class="p-4 border-2 rounded-2xl font-bold bg-white text-base">
                             <option value="Lãnh đạo">Lãnh đạo</option><option value="Chỉ huy">Chỉ huy Đội</option><option value="Trực ban">Trực ban</option>
                         </select>
-                        <button id="btnSaveStaff" onclick="handleStaffSave()" class="col-span-2 bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl mt-2">LƯU THÔNG TIN</button>
+                        <button id="btnSaveStaff" onclick="handleStaffSave()" class="col-span-2 bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl mt-2 transition-all">LƯU THÔNG TIN</button>
                         <button id="btnCancelEdit" onclick="cancelEditStaff()" class="col-span-2 bg-slate-400 text-white font-black py-2 rounded-2xl hidden">HỦY CHỈNH SỬA</button>
                     </div>
                 </div>
                 <div class="bg-blue-50 p-8 rounded-3xl border-2 border-blue-200 flex flex-col justify-center items-center">
-                    <p class="font-black mb-5 text-blue-800 italic uppercase text-sm text-center">Excel:</p>
+                    <p class="font-black mb-5 text-blue-800 italic uppercase text-sm text-center">Excel: mẫu STT | Họ Và Tên | Cấp Bậc | Chức Vụ | Nhóm</p>
                     <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcel(this)">
                     <button onclick="document.getElementById('excelInput').click()" class="bg-green-600 text-white font-black py-5 px-12 rounded-[2rem] shadow-2xl uppercase flex items-center gap-3 text-lg"><span>📂</span> Nhập Excel</button>
                 </div>
@@ -140,8 +147,8 @@
                 <div><label class="block font-black text-sm mb-2 text-slate-600 uppercase">Kết quả ca trực:</label><select id="evalRes" class="w-full p-4 border-2 rounded-2xl font-black bg-slate-50 text-lg"><option value="Đạt">✅ Đạt yêu cầu</option><option value="Không đạt">❌ Không đạt</option></select></div>
                 <div><label class="block font-black text-sm mb-2 text-slate-600 uppercase">Nhận xét chi tiết:</label><textarea id="evalReason" class="w-full p-4 border-2 rounded-2xl h-32 outline-none bg-slate-50 font-bold text-lg"></textarea></div>
                 <div class="flex gap-4">
-                    <button id="btnDeXuat" onclick="saveEval('Đề xuất')" class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-black shadow-xl">ĐỀ XUẤT</button>
-                    <button id="btnDuyet" onclick="saveEval('Đã duyệt')" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-xl hidden">PHÊ DUYỆT</button>
+                    <button id="btnDeXuat" onclick="saveEval('Đề xuất')" class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-black shadow-xl transition-all">ĐỀ XUẤT</button>
+                    <button id="btnDuyet" onclick="saveEval('Đã duyệt')" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-xl hidden transition-all">PHÊ DUYỆT</button>
                     <button onclick="closeEvalModal()" class="flex-1 bg-slate-200 py-4 rounded-2xl font-black text-slate-700">HỦY</button>
                 </div>
             </div>
@@ -222,7 +229,7 @@
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
-                const staffList = jsonData.slice(1).filter(row => row[0]).map(row => ({ name: row[0], rank: row[1] || "", pos: row[2] || "", group: row[3] || "Trực ban" }));
+                const staffList = jsonData.slice(1).filter(row => row[0]).map(row => ({ name: row[1] || "", rank: row[2] || "", pos: row[3] || "Cán Bộ", group: row[4] || "Trực ban" }));
                 if(confirm(`Phát hiện ${staffList.length} cán bộ. Bắt đầu nhập?`)) {
                     showL(true); await fetch(`${API}?action=batchAddCanBo&data=${encodeURIComponent(JSON.stringify(staffList))}`);
                     fetchAll();
