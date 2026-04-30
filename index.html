@@ -3,225 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Lịch Trực - PV06</title>
+    <title>Hệ Thống PV06 - Optimize Print v3.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @media print {
-            @page { size: A4; margin: 0; }
-            body { background-color: white !important; font-family: 'Times New Roman', Times, serif; font-size: 14pt; color: black !important; margin: 1.5cm; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .shadow, .shadow-md, .shadow-lg, .rounded-xl { box-shadow: none !important; border-radius: 0 !important; border: none !important; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; table-layout: auto; }
-            th, td { border: 1px solid black !important; padding: 6px !important; text-align: center; font-size: 12pt !important; }
-            th { background-color: transparent !important; font-weight: bold; font-size: 13pt !important; }
-            .print-header { text-align: center; margin-bottom: 20px; }
-            .print-header h2 { font-size: 15pt; font-weight: bold; margin: 0; text-transform: uppercase; }
-            .print-header h3 { font-size: 13pt; font-weight: normal; margin: 5px 0 0 0; }
-            select { border: none !important; font-size: 12pt !important; text-align: center; appearance: none; -webkit-appearance: none; white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; max-width: 100%; }
-            .print-signature-group { display: block !important; width: 100%; margin-top: 40px; page-break-inside: avoid; }
-            .print-signature { text-align: center; }
-            .print-signature h4 { font-weight: bold; margin-bottom: 5px; font-size: 14pt; }
-            .print-signature p.signature-prompt { margin-top: 90px; font-style: italic; font-size: 12pt; }
+            body { background: white; padding: 0; margin: 0; font-family: "Times New Roman", Times, serif; color: black !important; width: 100% !important; }
+            @page { size: A4 auto; margin: 10mm 12mm 10mm 12mm; }
+
+            table { width: 100% !important; border-collapse: collapse; table-layout: fixed; }
+            
+            th, td { 
+                border: 1px solid black !important; 
+                padding: 6px 3px !important; 
+                text-align: center; 
+                /* GIẢM CỠ CHỮ BẢN IN */
+                font-size: 10pt !important; 
+                vertical-align: middle !important; 
+                color: black !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+            
+            th { background-color: #f8f9fa !important; font-weight: bold; }
+            
+            /* ẨN HOÀN TOÀN MŨI TÊN CHỌN KHI IN */
+            select { 
+                -webkit-appearance: none !important;
+                -moz-appearance: none !important;
+                appearance: none !important; 
+                background: none !important; 
+                border: none !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                font-family: "Times New Roman", serif !important; 
+                font-weight: bold !important; 
+                font-size: 10pt !important;
+                color: black !important; 
+                width: 100% !important; 
+                text-align: center !important;
+                text-indent: 1px !important;
+                text-overflow: '' !important;
+            }
+            
+            .col-date { width: 13%; }
+            .col-lead { width: 29%; }
+            .col-cmd  { width: 29%; }
+            .col-duty { width: 29%; }
+
+            .show-eval .col-date { width: 11%; }
+            .show-eval .col-lead { width: 23%; }
+            .show-eval .col-cmd  { width: 21%; }
+            .show-eval .col-duty { width: 21%; }
+            .show-eval .col-eval { width: 24%; }
+            .show-eval .eval-col { display: table-cell !important; }
+            .eval-col { display: none; }
+
+            .eval-reason-print { display: block !important; font-size: 9pt; font-style: italic; text-align: left; margin-top: 3px; color: black !important; }
+            
+            .print-sig-container { page-break-inside: avoid !important; width: 100% !important; margin-top: 30px !important; }
+            .print-sig-table { width: 100% !important; border: none !important; }
+            .print-sig-table td { border: none !important; width: 50%; vertical-align: top; text-align: center; padding: 0 !important; color: black !important; }
+            .sig-space { height: 75px; }
         }
         .print-only { display: none; }
-        select { outline: none; background: transparent; cursor: pointer; }
-        select:disabled { cursor: not-allowed; opacity: 0.8; color: #4b5563; } 
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
-        .table-input { width: 100%; text-align: center; outline: none; background: transparent; font-size: inherit; }
-        .table-input:disabled { cursor: not-allowed; opacity: 0.8; }
-        .loader { border: 4px solid rgba(255,255,255,0.2); border-top-color: #3b82f6; border-radius: 50%; width: 3rem; height: 3rem; animation: spin 1s linear infinite; }
+        .eval-reason-print { display: none; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800 font-sans relative">
-
-    <div id="globalLoader" class="fixed inset-0 bg-slate-900 z-[9999] flex flex-col items-center justify-center text-white hidden">
-        <div class="loader mb-4"></div>
-        <h2 class="text-xl font-bold tracking-wide" id="loaderText">Đang xử lý dữ liệu...</h2>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+    <div id="loader" class="fixed inset-0 bg-white/90 z-[9999] flex flex-col items-center justify-center hidden">
+        <div class="loader mb-3"></div>
+        <p class="font-black text-blue-900 italic">Đang đồng bộ nghiệp vụ PV06...</p>
     </div>
 
-    <div id="loginScreen" class="flex items-center justify-center min-h-screen bg-slate-800">
-        <div class="bg-white p-10 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-blue-800">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-blue-900 uppercase">Phòng Hồ Sơ Nghiệp Vụ</h2><h3 class="text-lg font-semibold text-gray-600">(PV06)</h3>
-            </div>
-            <input type="text" id="username" class="w-full px-4 py-3 border rounded-lg mb-5 focus:ring-2 focus:ring-blue-800 outline-none" placeholder="Tài khoản...">
-            <input type="password" id="password" class="w-full px-4 py-3 border rounded-lg mb-6 focus:ring-2 focus:ring-blue-800 outline-none" placeholder="Mật khẩu...">
-            <button onclick="handleLogin()" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded-lg transition shadow-md">Đăng Nhập</button>
-            <p id="loginError" class="text-red-500 text-sm mt-4 text-center hidden bg-red-50 py-2 rounded"></p>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="flex items-center justify-center min-h-screen bg-slate-900 px-4">
+        <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-700">
+            <h1 class="text-3xl font-black text-center text-blue-900 mb-2 uppercase italic">Phòng Hồ Sơ Nghiệp Vụ</h1>
+            <p class="text-center text-slate-500 mb-10 font-bold italic">Hệ Thống Trực Ban & Đánh Giá</p>
+            <input type="text" id="user" class="w-full p-4 border rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-blue-600 font-bold text-lg" placeholder="Tài khoản">
+            <input type="password" id="pass" class="w-full p-4 border rounded-2xl mb-8 outline-none focus:ring-2 focus:ring-blue-600 font-bold text-lg" placeholder="Mật khẩu">
+            <button onclick="login()" class="w-full bg-blue-700 text-white font-black py-5 rounded-2xl hover:bg-blue-800 shadow-xl text-xl transition-all">ĐĂNG NHẬP</button>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-4 rounded-lg shadow no-print border-l-4 border-green-500">
-            <div><h1 class="text-xl font-bold text-blue-900 uppercase">Hệ Thống PV06</h1><p class="text-sm text-gray-500">Đã đồng bộ máy chủ</p></div>
-            <div class="mt-4 md:mt-0 flex flex-wrap justify-center items-center gap-2">
-                <span id="userInfo" class="font-semibold text-blue-800 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200 mr-2"></span>
-                
-                <button id="btnStats" onclick="document.getElementById('statsModal').classList.remove('hidden'); fetchStats();" class="hidden bg-purple-100 text-purple-800 border border-purple-300 font-semibold py-2 px-3 rounded shadow-sm">📊 Thống kê</button>
-                <button id="btnManagePersonnel" onclick="document.getElementById('personnelModal').classList.remove('hidden');" class="hidden bg-slate-100 text-slate-800 border border-slate-300 font-semibold py-2 px-3 rounded shadow-sm">👥 Cán bộ</button>
-                
-                <button onclick="exportToPDF()" class="bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-3 rounded shadow flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                    Xuất PDF
-                </button>
-
-                <button onclick="window.print()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded shadow">🖨️ In Lịch</button>
-                <button onclick="location.reload()" class="bg-slate-700 text-white font-semibold py-2 px-3 rounded shadow">Đăng xuất</button>
+    <!-- MAIN DASHBOARD -->
+    <div id="mainPage" class="hidden p-4 lg:p-8">
+        <header class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-8 rounded-[2rem] shadow-xl no-print">
+            <div class="text-center md:text-left mb-6 md:mb-0">
+                <h2 class="text-3xl font-black text-blue-900 uppercase italic">PV06 - Trực Ban & Đánh Giá</h2>
+                <p id="userTag" class="text-base font-bold text-slate-500 italic mt-1"></p>
             </div>
-        </div>
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="openStaffModal()" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>👥</span> Cán bộ</button>
+                <button onclick="preparePrint('lich', 'portrait')" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>🖨️</span> In Dọc Lịch</button>
+                <button onclick="preparePrint('eval', 'portrait')" class="bg-green-600 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>📋</span> In Dọc ĐG</button>
+                <button onclick="preparePrint('eval', 'landscape')" class="bg-amber-600 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>🔄</span> In Ngang ĐG</button>
+                <button onclick="location.reload()" class="bg-red-500 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:bg-red-600 transition-colors">Thoát</button>
+            </div>
+        </header>
 
-        <div class="bg-white rounded-xl shadow-lg p-8 relative">
-            <div class="print-header print-only"><h2>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h2><h3>Độc lập - Tự do - Hạnh phúc</h3><h2 style="margin-top: 30px;">BẢNG PHÂN CÔNG TRỰC BAN</h2><h3>PV06</h3></div>
-            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-4 font-medium text-gray-800 gap-4">
-                <div class="bg-blue-50 border-l-4 border-blue-800 p-3 rounded shadow-sm">Lãnh đạo: <select id="leaderSelect" class="font-bold text-blue-900 border-b border-blue-300 bg-transparent"></select></div>
-                <div class="text-right bg-gray-50 p-3 rounded-lg border shadow-sm no-print flex gap-3">
-                    Từ: <input type="datetime-local" id="startDatePicker" onchange="renderSchedule()" class="border px-2 py-1 font-bold text-blue-900 rounded outline-none cursor-pointer">
-                    Đến: <input type="datetime-local" id="endDatePicker" onchange="renderSchedule()" class="border px-2 py-1 font-bold text-blue-900 rounded outline-none cursor-pointer">
-                </div>
-                <div class="print-only text-right w-full mt-2"><p id="printWeekRange" class="font-bold text-gray-800 italic"></p></div>
+        <main class="max-w-7xl mx-auto bg-white p-6 lg:p-14 rounded-[3rem] shadow-2xl">
+            <div class="print-only text-center mb-10">
+                <h3 class="font-bold uppercase text-xl">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
+                <h4 class="font-bold text-lg">Độc lập - Tự do - Hạnh phúc</h4>
+                <div class="w-40 h-px bg-black mx-auto mt-2"></div>
+                <h2 id="printTitle" class="mt-10 font-black text-3xl uppercase italic">LỊCH TRỰC TUẦN</h2>
+                <p id="printTimeRange" class="italic font-bold text-xl mt-2"></p>
             </div>
 
-            <div id="lockWeekContainer" class="w-full flex justify-end mb-4 no-print"></div>
+            <div class="flex flex-wrap items-center gap-4 mb-10 no-print bg-blue-50 p-6 rounded-3xl border-2 border-blue-100">
+                <label class="font-black text-blue-900 text-lg italic">Thứ Tư giao ban:</label>
+                <input type="date" id="weekStart" onchange="loadWeek()" class="p-3 border-2 border-blue-200 rounded-2xl font-black outline-none focus:ring-4 focus:ring-blue-400">
+                <div id="lockBtnArea"></div>
+            </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse border border-gray-400 text-sm sm:text-base">
-                    <thead class="bg-gray-200 text-gray-800">
-                        <tr><th class="border border-gray-400 px-4 py-3">Thứ/Ngày</th><th class="border border-gray-400 px-4 py-3">Chỉ huy</th><th class="border border-gray-400 px-4 py-3">Trực ban</th><th class="border border-gray-400 px-4 py-3">Ghi chú</th><th class="border border-gray-400 px-2 py-3 no-print">Lưu</th></tr>
+                <table id="mainTable" class="w-full text-center border-collapse">
+                    <thead class="bg-slate-900 text-white">
+                        <tr>
+                            <th class="p-5 border text-sm uppercase font-black col-date">Thứ / Ngày</th>
+                            <th class="p-5 border text-sm uppercase font-black col-lead">Lãnh đạo trực tuần</th>
+                            <th class="p-5 border text-sm uppercase font-black col-cmd">Chỉ huy Đội trực</th>
+                            <th class="p-5 border text-sm uppercase font-black col-duty">Trực ban</th>
+                            <th class="p-5 border eval-col text-sm uppercase font-black col-eval">Kết quả / Nhận xét</th>
+                            <th class="p-5 border no-print text-sm uppercase font-black" style="width: 85px;">Lưu</th>
+                        </tr>
                     </thead>
                     <tbody id="scheduleBody"></tbody>
                 </table>
             </div>
-            <div class="print-only print-signature-group"><div style="display: flex; justify-content: space-between; padding: 0 50px;"><div class="print-signature"><h4>NGƯỜI LẬP BẢNG</h4><p class="signature-prompt">(Ký tên)</p></div><div class="print-signature"><h4>LÃNH ĐẠO PHÒNG DUYỆT</h4><p class="signature-prompt">(Ký tên)</p></div></div></div>
-        </div>
 
-        <div class="mt-8 bg-white rounded-xl shadow-lg p-6 no-print border-t-4 border-slate-700">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Sổ Nhật Ký Bàn Giao Ca</h3>
-            <div class="flex gap-3 mb-4">
-                <input type="text" id="noteInput" class="border rounded-lg px-4 py-2 flex-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập ghi chú / xin đổi ca...">
-                <button onclick="saveManualLog()" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg shadow">Lưu Nhật Ký</button>
+            <div class="print-only print-sig-container">
+                <table class="print-sig-table">
+                    <tr>
+                        <td><p class="font-bold uppercase text-xl">LÃNH ĐẠO PHÊ DUYỆT</p><p class="italic text-lg">(Ký và ghi rõ họ tên)</p><div class="sig-space"></div></td>
+                        <td><p class="font-bold uppercase text-xl">NGƯỜI LẬP DANH SÁCH</p><p class="italic text-lg">(Ký và ghi rõ họ tên)</p><div class="sig-space"></div></td>
+                    </tr>
+                </table>
             </div>
-            <div class="bg-gray-50 border rounded-lg p-4 max-h-64 overflow-y-auto"><ul id="logList" class="space-y-3 text-sm text-gray-700"></ul></div>
+        </main>
+    </div>
+
+    <!-- MODAL CÁN BỘ -->
+    <div id="staffModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-[50] backdrop-blur-md">
+        <div class="bg-white w-full max-w-5xl rounded-[3rem] p-10 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between mb-8 border-b-2 pb-6"><h3 class="text-3xl font-black text-blue-900 uppercase w-full text-center italic">Danh sách cán bộ nghiệp vụ</h3><button onclick="closeStaffModal()" class="text-4xl font-bold">&times;</button></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div class="bg-slate-50 p-8 rounded-3xl border-2 border-slate-200">
+                    <p class="font-black mb-4 text-blue-800 italic uppercase text-sm">Nhập lẻ:</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="cbName" class="p-4 border-2 rounded-2xl text-base font-bold" placeholder="Họ và tên">
+                        <select id="cbRank" class="p-4 border-2 rounded-2xl text-base font-bold bg-white">
+                            <option value="">-- Cấp bậc --</option>
+                            <option value="Đại tá">Đại tá</option><option value="Thượng tá">Thượng tá</option><option value="Trung tá">Trung tá</option><option value="Thiếu tá">Thiếu tá</option><option value="Đại úy">Đại úy</option><option value="Thượng úy">Thượng úy</option><option value="Trung úy">Trung úy</option><option value="Thiếu úy">Thiếu úy</option>
+                        </select>
+                        <input id="cbPos" class="p-4 border-2 rounded-2xl text-base font-bold" placeholder="Chức vụ">
+                        <select id="cbGroup" class="p-4 border-2 rounded-2xl text-base font-bold bg-white">
+                            <option value="Lãnh đạo">Lãnh đạo</option><option value="Chỉ huy">Chỉ huy Đội</option><option value="Trực ban">Trực ban</option>
+                        </select>
+                        <button onclick="addCanBo()" class="col-span-2 bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl mt-2 transition-all">THÊM VÀO HỆ THỐNG</button>
+                    </div>
+                </div>
+                <div class="bg-blue-50 p-8 rounded-3xl border-2 border-blue-200 flex flex-col justify-center items-center">
+                    <p class="font-black mb-5 text-blue-800 italic uppercase text-sm text-center">Excel: Định dạng STT | Họ tên | Cấp bậc | Chức vụ </p>
+                    <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcel(this)">
+                    <button onclick="document.getElementById('excelInput').click()" class="bg-green-600 text-white font-black py-5 px-12 rounded-[2rem] shadow-2xl hover:bg-green-700 transition-all uppercase flex items-center gap-3 text-lg"><span>📂</span> Nhập Excel</button>
+                </div>
+            </div>
+            <table class="w-full text-base border-collapse"><thead class="bg-slate-100"><tr><th class="p-4 border">STT</th><th class="p-4 border">Họ tên</th><th class="p-4 border">Cấp bậc</th><th class="p-4 border">Chức vụ</th><th class="p-4 border">Xóa</th></tr></thead><tbody id="staffTableBody"></tbody></table>
         </div>
     </div>
 
-    <div id="statsModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl m-4 flex flex-col">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h2 class="text-xl font-bold text-purple-900">Thống kê ca trực</h2><button onclick="fetchStats()" class="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">↻ Tải lại</button></div>
-            <div class="overflow-y-auto mb-4 border rounded bg-gray-50"><table class="w-full text-sm text-left"><thead class="bg-purple-100 sticky top-0"><tr><th class="px-4 py-3 border-b">Họ tên</th><th class="px-4 py-3 text-center">Chỉ Huy</th><th class="px-4 py-3 text-center">Trực Ban</th><th class="px-4 py-3 text-center font-bold">Tổng</th></tr></thead><tbody id="statsTableBody"></tbody></table></div>
-            <button onclick="document.getElementById('statsModal').classList.add('hidden')" class="bg-gray-200 py-2 rounded font-semibold">Đóng</button>
-        </div>
-    </div>
-
-    <div id="personnelModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl m-4 flex flex-col">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h2 class="text-xl font-bold text-blue-900">Danh sách cán bộ</h2><button onclick="document.getElementById('addMemberForm').classList.toggle('hidden')" class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full font-semibold">+ Thêm</button></div>
-            <div class="overflow-y-auto mb-4 border rounded bg-gray-50 max-h-64"><table class="w-full text-sm text-left"><thead class="bg-gray-200 sticky top-0"><tr><th class="px-4 py-2 border-b">Họ tên</th><th class="px-4 py-2 border-b">Chức vụ</th><th class="px-4 py-2 w-16 text-center">Xóa</th></tr></thead><tbody id="personnelTableBody"></tbody></table></div>
-            <div id="addMemberForm" class="hidden bg-blue-50 p-4 rounded-lg border mb-4"><div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"><input type="text" id="newCbName" class="w-full px-3 py-2 border rounded text-sm outline-none" placeholder="Họ tên"><input type="date" id="newCbDob" class="w-full px-3 py-2 border rounded text-sm outline-none"><select id="newCbRole" class="w-full px-3 py-2 border rounded text-sm outline-none"><option value="Lãnh đạo">Lãnh đạo</option><option value="Chỉ huy">Chỉ huy</option><option value="Trực ban">Trực ban</option></select></div><button onclick="saveNewPersonnel()" class="bg-blue-600 text-white py-2 rounded w-full font-bold">Lưu</button></div>
-            <button onclick="document.getElementById('personnelModal').classList.add('hidden')" class="bg-gray-200 py-2 rounded font-semibold">Đóng</button>
+    <!-- MODAL ĐÁNH GIÁ -->
+    <div id="evalModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-[60] backdrop-blur-md">
+        <div class="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl border-t-8 border-green-600">
+            <h3 class="font-black text-2xl mb-8 text-blue-900 border-b pb-4 text-center italic underline">Đánh giá ngày <span id="evalDateText"></span></h3>
+            <div class="space-y-6">
+                <div><label class="block font-black text-sm mb-2 text-slate-600 uppercase">Kết quả ca trực:</label><select id="evalRes" class="w-full p-4 border-2 rounded-2xl font-black bg-slate-50 text-lg"><option value="Đạt">✅ Đạt yêu cầu</option><option value="Không đạt">❌ Không đạt</option></select></div>
+                <div><label class="block font-black text-sm mb-2 text-slate-600 uppercase">Nhận xét chi tiết:</label><textarea id="evalReason" class="w-full p-4 border-2 rounded-2xl h-32 outline-none focus:ring-4 focus:ring-blue-400 bg-slate-50 font-bold text-lg"></textarea></div>
+                <div class="flex gap-4">
+                    <button id="btnDeXuat" onclick="saveEval('Đề xuất')" class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-black shadow-xl">ĐỀ XUẤT</button>
+                    <button id="btnDuyet" onclick="saveEval('Đã duyệt')" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-xl hidden">PHÊ DUYỆT</button>
+                    <button onclick="closeEvalModal()" class="flex-1 bg-slate-200 py-4 rounded-2xl font-black text-slate-700">HỦY</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwOb7WE8OY6EM229CwII4L87Gt8iTcQgW5TcKfm1pB9XzIyAjIdIp0oZdE29mq9O5yx/exec"; 
-        let currentUser = "", currentRole = "", scheduleData = { shifts: {}, lockedWeeks: [] }, rawPersonnelData = []; 
-        let dSLanhDao = [], dSChiHuy = ["-- Chọn Chỉ Huy --"], dSCanBo = ["-- Chọn Trực Ban --"];
+        const API = "https://script.google.com/macros/s/AKfycbwOb7WE8OY6EM229CwII4L87Gt8iTcQgW5TcKfm1pB9XzIyAjIdIp0oZdE29mq9O5yx/exec";
+        let user = "", role = "", allCanBo = [], schFull = {};
+        function showL(s){ document.getElementById('loader').classList.toggle('hidden', !s); }
 
-        function showLoad(txt) { document.getElementById('loaderText').innerText = txt; document.getElementById('globalLoader').classList.remove('hidden'); }
-        function hideLoad() { document.getElementById('globalLoader').classList.add('hidden'); }
-
-        async function handleLogin() {
-            const u = document.getElementById('username').value.trim(), p = document.getElementById('password').value.trim();
-            if(!u||!p) return; showLoad("Đang xác thực...");
+        async function login(){
+            const u = document.getElementById('user').value, p = document.getElementById('pass').value;
+            if(!u || !p) return; showL(true);
             try {
-                let data = await (await fetch(`${API_URL}?action=login&username=${u}&password=${p}`)).json();
-                if(data.success) {
-                    currentUser=u; currentRole=data.role;
-                    document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('dashboard').classList.remove('hidden');
-                    document.getElementById('userInfo').innerText=`👤: ${u.toUpperCase()} (${data.role})`;
-                    if(currentRole==='Lãnh đạo'){ document.getElementById('btnManagePersonnel').classList.replace('hidden','flex'); document.getElementById('btnStats').classList.replace('hidden','flex'); }
-                    await fetchAllData(); 
-                } else { hideLoad(); document.getElementById('loginError').innerText="Sai thông tin!"; document.getElementById('loginError').classList.remove('hidden'); }
-            } catch(e) { hideLoad(); alert("Lỗi mạng!"); }
+                const res = await fetch(`${API}?action=login&username=${u}&password=${p}`).then(r => r.json());
+                if(res.success){
+                    user = u; role = res.role;
+                    document.getElementById('loginPage').classList.add('hidden');
+                    document.getElementById('mainPage').classList.remove('hidden');
+                    document.getElementById('userTag').innerText = `Người thực hiện: ${user.toUpperCase()} (${role})`;
+                    const t = new Date(); const lastWed = new Date(t.setDate(t.getDate() - (t.getDay() + 3) % 7));
+                    document.getElementById('weekStart').value = lastWed.toISOString().split('T')[0];
+                    fetchAll();
+                } else { showL(false); alert("Sai mật khẩu!"); }
+            } catch(e) { showL(false); alert("Lỗi kết nối!"); }
         }
 
-        async function fetchAllData() {
+        async function fetchAll(){
+            showL(true);
             try {
-                showLoad("Đang tải dữ liệu...");
-                const [cbRes, schRes] = await Promise.all([fetch(`${API_URL}?action=getCanBo`), fetch(`${API_URL}?action=getScheduleData`)]);
-                rawPersonnelData = await cbRes.json(); scheduleData = await schRes.json();
-                dSLanhDao = []; dSChiHuy = ["-- Chọn Chỉ Huy --"]; dSCanBo = ["-- Chọn Trực Ban --"];
-                rawPersonnelData.forEach(cb => { if(cb.role === "Lãnh đạo") dSLanhDao.push(cb.name); else if(cb.role === "Chỉ huy") dSChiHuy.push(cb.name); else if(cb.role === "Trực ban") dSCanBo.push(cb.name); });
-                document.getElementById('leaderSelect').innerHTML = dSLanhDao.map(n => `<option>${n}</option>`).join('');
-                document.getElementById('leaderSelect').disabled = currentRole !== 'Lãnh đạo';
-                renderSchedule(); renderPersonnelTable(); await fetchLogs(); hideLoad();
-            } catch(e) { hideLoad(); }
+                const [cb, sf] = await Promise.all([ fetch(`${API}?action=getCanBo`).then(r=>r.json()), fetch(`${API}?action=getScheduleFull`).then(r=>r.json()) ]);
+                allCanBo = cb; schFull = sf; renderStaffTable(); loadWeek();
+            } finally { showL(false); }
         }
 
-        function renderSchedule() {
-            let startP = document.getElementById('startDatePicker'), endP = document.getElementById('endDatePicker');
-            let sDate = startP.value ? new Date(startP.value) : new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + (new Date().getDay()<3?-4:3)));
-            if(!startP.value) { sDate.setHours(7,0,0,0); startP.value = sDate.toISOString().slice(0,16); }
-            let eDate = endP.value ? new Date(endP.value) : new Date(new Date(sDate).setDate(sDate.getDate() + 7));
-            if(!endP.value) endP.value = eDate.toISOString().slice(0,16);
+        function renderStaffTable(){
+            const b = document.getElementById('staffTableBody'); b.innerHTML = "";
+            allCanBo.forEach((c, index) => { b.innerHTML += `<tr class="border-b-2 text-center hover:bg-slate-50"><td class="p-4 border font-bold text-slate-500">${index + 1}</td><td class="p-4 border font-black text-slate-800 text-left">${c.name}</td><td class="p-4 border font-bold">${c.rank}</td><td class="p-4 border">${c.pos}</td><td class="p-4 border"><button onclick="deleteCb('${c.name}')" class="text-red-600 font-black hover:scale-110 transition-transform">Xóa</button></td></tr>`; });
+        }
 
-            const isLeader = currentRole === 'Lãnh đạo';
-            document.getElementById('printWeekRange').innerText = `(Chu kỳ: ${sDate.getHours()}h${sDate.getMinutes()} ${sDate.toLocaleDateString('vi-VN')} đến ${eDate.getHours()}h${eDate.getMinutes()} ${eDate.toLocaleDateString('vi-VN')})`;
-            
-            const weekKey = `${sDate.getDate().toString().padStart(2,'0')}/${(sDate.getMonth()+1).toString().padStart(2,'0')}/${sDate.getFullYear()}`;
-            const isLocked = scheduleData.lockedWeeks.includes(weekKey);
-            const lockBox = document.getElementById('lockWeekContainer');
-            if (isLeader) lockBox.innerHTML = !isLocked ? `<button onclick="smartLock('${weekKey}')" class="bg-red-600 text-white font-bold py-2 px-6 rounded shadow">🔒 Chốt Lịch</button>` : `<button onclick="unlock('${weekKey}')" class="bg-blue-600 text-white font-bold py-2 px-6 rounded shadow">🔓 Mở Chốt</button>`;
-            else lockBox.innerHTML = isLocked ? `<span class="bg-red-100 text-red-800 font-bold py-2 px-6 rounded border">🔒 ĐÃ KHÓA</span>` : '';
+        async function addCanBo(){
+            const n = document.getElementById('cbName').value, r = document.getElementById('cbRank').value, p = document.getElementById('cbPos').value, g = document.getElementById('cbGroup').value;
+            if(!n || !r) return; showL(true); 
+            await fetch(`${API}?action=addCanBo&name=${encodeURIComponent(n)}&rank=${encodeURIComponent(r)}&pos=${encodeURIComponent(p)}&group=${encodeURIComponent(g)}`);
+            document.getElementById('cbName').value = ""; document.getElementById('cbPos').value = ""; fetchAll();
+        }
 
-            let tbody = document.getElementById('scheduleBody'), html = '', dayDiff = Math.ceil((eDate - sDate)/86400000);
-            for(let i=0; i<dayDiff; i++) {
-                let nD = new Date(sDate); nD.setDate(sDate.getDate() + i);
-                let fD = `${nD.getDate().toString().padStart(2,'0')}/${(nD.getMonth()+1).toString().padStart(2,'0')}/${nD.getFullYear()}`;
-                let sS = scheduleData.shifts[fD] || { chihuy: '-- Chọn Chỉ Huy --', trucban: '-- Chọn Trực Ban --', note: '' };
-                let dis = (isLeader && !isLocked) ? '' : 'disabled';
-                let btn = isLocked ? `<span class="text-red-700 font-bold text-xs">Đã chốt</span>` : (isLeader ? `<button id="btn_${i}" onclick="saveRow(${i},'${fD}')" class="bg-green-600 text-white text-xs py-1.5 px-4 rounded font-bold">Lưu</button>` : `<span class="text-gray-400 text-xs italic">Chỉ xem</span>`);
-                html += `<tr class="${nD.getDay()===0||nD.getDay()===6?'bg-red-50':''} border-b border-gray-300">
-                    <td class="border border-gray-400 px-2 py-3 text-center"><b>${nD.getDay()===0?'CN':'T'+(nD.getDay()+1)}</b><br><small>${nD.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'})}</small></td>
-                    <td class="border border-gray-400 px-1 py-3">${isLocked?`<b>${sS.chihuy}</b>`:`<select id="ch_${i}" class="w-full text-center bg-transparent outline-none">${dSChiHuy.map(n=>`<option ${n===sS.chihuy?'selected':''}>${n}</option>`).join('')}</select>`}</td>
-                    <td class="border border-gray-400 px-1 py-3">${isLocked?`<b>${sS.trucban}</b>`:`<select id="tb_${i}" class="w-full text-center bg-transparent outline-none">${dSCanBo.map(n=>`<option ${n===sS.trucban?'selected':''}>${n}</option>`).join('')}</select>`}</td>
-                    <td class="border border-gray-400 px-2 py-3">${isLocked?`<i>${sS.note}</i>`:`<input id="nt_${i}" type="text" value="${sS.note}" class="table-input" placeholder="..." ${dis}>`}</td>
-                    <td class="border border-gray-400 px-2 py-3 text-center no-print">${btn}</td>
-                </tr>`;
+        function handleExcel(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                const staffList = jsonData.slice(1).filter(row => row[0]).map(row => ({ name: row[0], rank: row[1] || "", pos: row[2] || "", group: row[3] || "Trực ban" }));
+                if(confirm(`Phát hiện ${staffList.length} cán bộ. Bắt đầu nhập?`)) {
+                    showL(true); await fetch(`${API}?action=batchAddCanBo&data=${encodeURIComponent(JSON.stringify(staffList))}`);
+                    fetchAll();
+                }
+                input.value = "";
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function deleteCb(name) { if(!confirm(`Xóa cán bộ ${name}?`)) return; showL(true); await fetch(`${API}?action=deleteCanBo&name=${encodeURIComponent(name)}`); fetchAll(); }
+
+        function loadWeek(){
+            const startVal = document.getElementById('weekStart').value; if(!startVal) return;
+            const start = new Date(startVal); const end = new Date(start); end.setDate(start.getDate() + 7);
+            document.getElementById('printTimeRange').innerText = `(Từ 07h00 ngày ${start.toLocaleDateString('vi-VN')} đến 07h00 ngày ${end.toLocaleDateString('vi-VN')})`;
+            const weekKey = start.toLocaleDateString('vi-VN'); const isLocked = schFull.lockedWeeks.includes(weekKey);
+            const lockArea = document.getElementById('lockBtnArea');
+            if(role === 'Trưởng phòng') { lockArea.innerHTML = !isLocked ? `<button onclick="lockW('${weekKey}')" class="bg-red-600 text-white px-6 py-2.5 rounded-2xl shadow-xl font-black text-sm uppercase">🔒 Chốt Lịch</button>` : `<button onclick="unlockW('${weekKey}')" class="bg-blue-600 text-white px-6 py-2.5 rounded-2xl shadow-xl font-black text-sm uppercase">🔓 Mở Khóa</button>`; } else lockArea.innerHTML = isLocked ? `<span class="bg-red-100 text-red-700 px-5 py-2.5 rounded-2xl font-black text-xs uppercase border-2 border-red-200">🔒 Tuần đã chốt</span>` : "";
+            const tbody = document.getElementById('scheduleBody'); tbody.innerHTML = "";
+            for(let i=0; i<7; i++){
+                const d = new Date(start); d.setDate(start.getDate() + i); const ds = d.toLocaleDateString('vi-VN');
+                const saved = schFull.shifts[ds] || { leader: "--", commander: "--", duty: "--" };
+                const ev = schFull.evals[ds] || { res: "Chưa ĐG", reason: "", status: "" };
+                const lOpts = allCanBo.filter(c => c.group === "Lãnh đạo").map(c => `<option ${saved.leader.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
+                const cOpts = allCanBo.filter(c => c.group === "Chỉ huy").map(c => `<option ${saved.commander.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
+                const dOpts = allCanBo.filter(c => c.group === "Trực ban").map(c => `<option ${saved.duty.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
+                const isAuth = (role === 'Trưởng phòng' && !isLocked); const dayLab = d.getDay() === 0 ? "Chủ Nhật" : `Thứ ${d.getDay() + 1}`;
+                tbody.innerHTML += `
+                    <tr class="border-b-2 hover:bg-slate-50">
+                        <td class="p-5 border font-black text-sm bg-slate-50">${dayLab}<br>${ds}</td>
+                        <td class="p-1 border">${isLocked?`<b>${saved.leader}</b>`:`<select id="l_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent" ${isAuth?'':'disabled'}>${lOpts}</select>`}</td>
+                        <td class="p-1 border">${isLocked?`<b>${saved.commander}</b>`:`<select id="c_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent" ${isAuth?'':'disabled'}>${cOpts}</select>`}</td>
+                        <td class="p-1 border">${isLocked?`<b>${saved.duty}</b>`:`<select id="d_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent" ${isAuth?'':'disabled'}>${dOpts}</select>`}</td>
+                        <td class="p-1 border eval-col bg-slate-50">
+                            <div class="cursor-pointer px-1 py-3" onclick="openEval('${ds}')">
+                                <span class="font-black text-sm ${ev.res === 'Đạt' ? 'text-green-600' : 'text-red-600'}">${ev.res}</span><br>
+                                <span class="text-[10px] italic text-slate-400 font-black no-print">${ev.status || '(Bấm để ĐG)'}</span>
+                                <div class="eval-reason-print">${ev.reason || ''}</div>
+                            </div>
+                        </td>
+                        <td class="p-1 border no-print"><button onclick="saveRow(${i}, '${ds}')" ${isAuth?'':'disabled'} class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg hover:bg-blue-700 transition-all">Lưu</button></td>
+                    </tr>`;
             }
-            tbody.innerHTML = html;
         }
 
-        async function saveRow(idx, date) {
-            let btn = document.getElementById(`btn_${idx}`); btn.disabled=true; btn.innerText="...";
-            let ch = document.getElementById(`ch_${idx}`).value, tb = document.getElementById(`tb_${idx}`).value, nt = document.getElementById(`nt_${idx}`).value || "";
-            await fetch(`${API_URL}?action=saveShift&date=${date}&chihuy=${ch}&trucban=${tb}&note=${encodeURIComponent(nt)}&user=${currentUser}`);
-            if(!scheduleData.shifts) scheduleData.shifts={}; scheduleData.shifts[date]={chihuy:ch, trucban:tb, note:nt};
-            btn.innerText="✔"; fetchLogs(); setTimeout(()=> {btn.disabled=false; btn.innerText="Lưu";}, 1500);
-        }
-
-        async function smartLock(wk) {
-            if(!confirm("Chốt lịch và lưu toàn bộ thay đổi?")) return; showLoad("Đang lưu & chốt...");
-            let startP = document.getElementById('startDatePicker'), sDate = new Date(startP.value), dayDiff = Math.ceil((new Date(document.getElementById('endDatePicker').value) - sDate)/86400000), list = [];
-            for(let i=0; i<dayDiff; i++){ let nD = new Date(sDate); nD.setDate(nD.getDate()+i); let fD = `${nD.getDate().toString().padStart(2,'0')}/${(nD.getMonth()+1).toString().padStart(2,'0')}/${nD.getFullYear()}`; list.push({date:fD, chihuy:document.getElementById(`ch_${i}`).value, trucban:document.getElementById(`tb_${i}`).value, note:document.getElementById(`nt_${i}`).value || ""}); }
-            await fetch(`${API_URL}?action=saveBatch&data=${encodeURIComponent(JSON.stringify(list))}&user=${currentUser}`);
-            await fetch(`${API_URL}?action=lockWeek&weekKey=${wk}&user=${currentUser}`); await fetchAllData();
-        }
-
-        async function unlock(wk) { if(confirm("Mở khóa bảng?")) { showLoad("Đang mở..."); await fetch(`${API_URL}?action=unlockWeek&weekKey=${wk}&user=${currentUser}`); await fetchAllData(); } }
-        async function fetchLogs() { let logs = await (await fetch(`${API_URL}?action=getLogs`)).json(); document.getElementById('logList').innerHTML = logs.map(x => `<li class="border-b pb-1"><b>[${new Date(x.time).toLocaleTimeString('vi-VN')}]</b> ${x.content} <i>(${x.user})</i></li>`).join(''); }
-        async function saveManualLog() { let n = document.getElementById('noteInput'); if(!n.value) return; showLoad("Đang lưu..."); await fetch(`${API_URL}?action=saveLog&note=${encodeURIComponent(n.value)}&user=${currentUser}`); n.value=''; await fetchLogs(); hideLoad(); }
-        async function fetchStats() { let s = await (await fetch(`${API_URL}?action=getStats`)).json(); document.getElementById('statsTableBody').innerHTML = s.map(st => `<tr class="border-b"><td class="px-4 py-2">${st.name}</td><td class="text-center">${st.chihuy}</td><td class="text-center">${st.trucban}</td><td class="text-center font-bold">${st.total}</td></tr>`).join(''); }
-        function renderPersonnelTable() { document.getElementById('personnelTableBody').innerHTML = rawPersonnelData.map(cb => `<tr class="border-b"><td class="px-4 py-2">${cb.name}</td><td>${cb.role}</td><td class="text-center"><button onclick="deleteCb('${cb.name}')">❌</button></td></tr>`).join(''); }
-        async function saveNewPersonnel() { let n=document.getElementById('newCbName').value, d=document.getElementById('newCbDob').value, r=document.getElementById('newCbRole').value; if(!n||!d) return; showLoad("Đang thêm..."); await fetch(`${API_URL}?action=addCanBo&name=${encodeURIComponent(n)}&dob=${new Date(d).toLocaleDateString('vi-VN')}&role=${r}`); document.getElementById('newCbName').value=''; await fetchAllData(); }
-        async function deleteCb(n) { if(confirm(`Xóa ${n}?`)) { showLoad("Đang xóa..."); await fetch(`${API_URL}?action=deleteCanBo&name=${encodeURIComponent(n)}`); await fetchAllData(); } }
-
-        // HÀM XUẤT PDF 
-        function exportToPDF() {
-            alert("Cha lưu ý: Ở màn hình tiếp theo, phần 'Máy in' (Destination), cha hãy chọn 'Lưu dưới dạng PDF' nhé!");
+        async function saveRow(i, date){ const data = [{ date: date, leader: document.getElementById(`l_${i}`).value, commander: document.getElementById(`c_${i}`).value, duty: document.getElementById(`d_${i}`).value }]; showL(true); await fetch(`${API}?action=saveBatch&data=${encodeURIComponent(JSON.stringify(data))}&user=${user}`); fetchAll(); }
+        let curEvDate = ""; function openEval(date){ if(role === "Trực ban") return; curEvDate = date; document.getElementById('evalDateText').innerText = date; const ev = schFull.evals[date] || { res: "Đạt", reason: "" }; document.getElementById('evalRes').value = ev.res === "Chưa ĐG" ? "Đạt" : ev.res; document.getElementById('evalReason').value = ev.reason; document.getElementById('btnDeXuat').classList.toggle('hidden', role !== 'Tổ trưởng Điều lệnh'); document.getElementById('btnDuyet').classList.toggle('hidden', !['Trưởng phòng', 'Phó Trưởng phòng'].includes(role)); document.getElementById('evalModal').classList.remove('hidden'); }
+        async function saveEval(st){ const res = document.getElementById('evalRes').value, rea = document.getElementById('evalReason').value; showL(true); await fetch(`${API}?action=saveEval&date=${curEvDate}&result=${res}&reason=${encodeURIComponent(rea)}&status=${st}&user=${user}`); closeEvalModal(); fetchAll(); }
+        async function lockW(k){ if(confirm("Xác nhận chốt lịch toàn tuần?")) { showL(true); await fetch(`${API}?action=lockWeek&weekKey=${k}&user=${user}`); fetchAll(); } }
+        async function unlockW(k){ if(confirm("Mở khóa chỉnh sửa lịch?")) { showL(true); await fetch(`${API}?action=unlockWeek&weekKey=${k}&user=${user}`); fetchAll(); } }
+        
+        function preparePrint(type, mode) {
+            document.body.classList.remove('landscape-mode', 'portrait-mode');
+            document.body.classList.add(mode + '-mode');
+            const style = document.createElement('style');
+            style.innerHTML = `@page { size: A4 ${mode}; }`;
+            document.head.appendChild(style);
+            if(type === 'lich') {
+                document.body.classList.remove('show-eval');
+                document.getElementById('printTitle').innerText = "LỊCH TRỰC TUẦN";
+            } else {
+                document.body.classList.add('show-eval');
+                document.getElementById('printTitle').innerText = "BẢNG TỔNG HỢP THEO DÕI VÀ ĐÁNH GIÁ KẾT QUẢ TRỰC BAN";
+            }
             window.print();
+            style.remove();
         }
+        function openStaffModal(){ document.getElementById('staffModal').classList.remove('hidden'); }
+        function closeStaffModal(){ document.getElementById('staffModal').classList.add('hidden'); }
+        function closeEvalModal(){ document.getElementById('evalModal').classList.add('hidden'); }
     </script>
 </body>
 </html>
