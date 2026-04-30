@@ -3,88 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống PV06 - Zero Shadow v3.9</title>
+    <title>Hệ Thống PV06 - Pro v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            
-            /* LOẠI BỎ BÓNG ĐỔ VÀ BO GÓC LÀM PHÌNH TRANG */
-            * { 
-                box-shadow: none !important; 
-                text-shadow: none !important;
-                border-radius: 0 !important;
-            }
-
-            body { 
-                background: white !important; 
-                padding: 0 !important; 
-                margin: 0 !important; 
-                font-family: "Times New Roman", Times, serif; 
-                color: black !important; 
-            }
-            
-            @page { 
-                size: A4 landscape; 
-                margin: 5mm 8mm 5mm 8mm; /* Giảm lề giấy xuống mức cực thấp */
-            }
-            
-            /* Ép container in sát lề trên, bỏ padding thừa */
-            #printArea {
-                display: block !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                width: 100% !important;
-                border: none !important;
-            }
-
+            * { box-shadow: none !important; text-shadow: none !important; border-radius: 0 !important; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; font-family: "Times New Roman", Times, serif; color: black !important; width: 100% !important; }
+            @page { size: A4 landscape; margin: 5mm 8mm 5mm 8mm; }
+            #printArea { display: block !important; padding: 0 !important; margin: 0 !important; width: 100% !important; border: none !important; }
             table { width: 100% !important; border-collapse: collapse; table-layout: fixed; margin-bottom: 5px; }
-            
-            th, td { 
-                border: 1px solid black !important; 
-                padding: 4px 2px !important; /* Thu nhỏ đệm ô */
-                text-align: center; 
-                font-size: 10.5pt !important; 
-                vertical-align: middle !important; 
-                color: black !important;
-            }
-            
+            th, td { border: 1px solid black !important; padding: 4px 2px !important; text-align: center; font-size: 10.5pt !important; vertical-align: middle !important; color: black !important; white-space: normal !important; word-break: break-word !important; }
             th { background-color: #f8f9fa !important; font-weight: bold; }
-            
-            select { 
-                -webkit-appearance: none !important; appearance: none !important; 
-                background: none !important; border: none !important; 
-                padding: 0 !important; font-family: "Times New Roman", serif !important; 
-                font-weight: bold !important; font-size: 10.5pt !important;
-                color: black !important; width: 100% !important; text-align: center !important;
-            }
-            
-            /* Tỷ lệ cột Landscape */
-            .col-date { width: 10%; }
-            .col-lead { width: 30%; }
-            .col-cmd  { width: 30%; }
-            .col-duty { width: 30%; }
-
-            .show-eval .col-lead { width: 23%; }
-            .show-eval .col-cmd  { width: 21%; }
-            .show-eval .col-duty { width: 21%; }
-            .show-eval .col-eval { width: 25%; }
-            .show-eval .eval-col { display: table-cell !important; }
-            .eval-col { display: none; }
-
+            select { -webkit-appearance: none !important; appearance: none !important; background: none !important; border: none !important; padding: 0 !important; font-family: "Times New Roman", serif !important; font-weight: bold !important; font-size: 10.5pt !important; color: black !important; width: 100% !important; text-align: center !important; }
+            .col-date { width: 10%; } .col-lead { width: 30%; } .col-cmd { width: 30%; } .col-duty { width: 30%; }
+            .show-eval .col-lead { width: 23%; } .show-eval .col-cmd { width: 21%; } .show-eval .col-duty { width: 21%; } .show-eval .col-eval { width: 25%; }
+            .show-eval .eval-col { display: table-cell !important; } .eval-col { display: none; }
             .eval-reason-print { display: block !important; font-size: 9pt; font-style: italic; text-align: left; margin-top: 1px; color: black !important; }
-            
-            /* KÉO CHỮ KÝ LÊN CỰC SÁT */
-            .print-sig-container { 
-                width: 100% !important; 
-                margin-top: 10px !important; /* Khoảng cách cực nhỏ giữa bảng và chữ ký */
-                page-break-inside: avoid !important;
-            }
+            .print-sig-container { width: 100% !important; margin-top: 10px !important; page-break-inside: avoid !important; }
             .print-sig-table { width: 100% !important; border: none !important; }
             .print-sig-table td { border: none !important; width: 50%; vertical-align: top; text-align: center; padding: 0 !important; }
-            .sig-space { height: 55px; } /* Chiều cao tối thiểu để ký */
+            .sig-space { height: 55px; }
         }
         .print-only { display: none; }
         .eval-reason-print { display: none; }
@@ -98,7 +39,6 @@
         <p class="font-black text-blue-900 italic">Đang đồng bộ nghiệp vụ PV06...</p>
     </div>
 
-    <!-- LOGIN PAGE -->
     <div id="loginPage" class="flex items-center justify-center min-h-screen bg-slate-900 px-4">
         <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-700">
             <h1 class="text-3xl font-black text-center text-blue-900 mb-2 uppercase italic">Phòng Hồ Sơ Nghiệp Vụ</h1>
@@ -109,7 +49,6 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD -->
     <div id="mainPage" class="hidden p-4 lg:p-8">
         <header class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-8 rounded-[2rem] shadow-xl no-print">
             <div class="text-center md:text-left mb-6 md:mb-0">
@@ -117,14 +56,14 @@
                 <p id="userTag" class="text-base font-bold text-slate-500 italic mt-1"></p>
             </div>
             <div class="flex flex-wrap gap-4 justify-center">
-                <button onclick="openStaffModal()" class="bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>👥</span> Cán bộ</button>
-                <button onclick="preparePrint('lich', 'landscape')" class="bg-blue-700 text-white px-6 py-3 rounded-2xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>🔄</span> In Ngang Lịch</button>
-                <button onclick="preparePrint('eval', 'landscape')" class="bg-amber-600 text-white px-6 py-3 rounded-2xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>🔄</span> In Ngang ĐG</button>
-                <button onclick="location.reload()" class="bg-red-500 text-white px-6 py-3 rounded-2xl shadow-lg font-black text-sm hover:bg-red-600 transition-colors">Thoát</button>
+                <button onclick="openStaffModal()" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>👥</span> Cán bộ</button>
+                <button id="btnApproveAll" onclick="saveAllRows()" class="bg-blue-800 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2 hidden"><span>✅</span> Phê duyệt tuần</button>
+                <button onclick="preparePrint('lich', 'landscape')" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>🔄</span> In Ngang Lịch</button>
+                <button onclick="preparePrint('eval', 'landscape')" class="bg-amber-600 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:scale-105 transition-transform flex items-center gap-2"><span>🔄</span> In Ngang ĐG</button>
+                <button onclick="location.reload()" class="bg-red-500 text-white px-5 py-2.5 rounded-xl shadow-lg font-black text-sm hover:bg-red-600 transition-colors">Thoát</button>
             </div>
         </header>
 
-        <!-- Container ID="printArea" quan trọng để fix bóng đổ -->
         <main id="printArea" class="max-w-7xl mx-auto bg-white p-6 lg:p-14 rounded-[3rem] shadow-2xl">
             <div class="print-only text-center mb-5">
                 <h3 class="font-bold uppercase text-lg">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
@@ -133,13 +72,11 @@
                 <h2 id="printTitle" class="mt-6 font-black text-2xl uppercase italic">LỊCH TRỰC TUẦN</h2>
                 <p id="printTimeRange" class="italic font-bold text-lg mt-1"></p>
             </div>
-
             <div class="flex flex-wrap items-center gap-4 mb-10 no-print bg-blue-50 p-6 rounded-3xl border-2 border-blue-100">
                 <label class="font-black text-blue-900 text-lg italic">Thứ Tư giao ban:</label>
                 <input type="date" id="weekStart" onchange="loadWeek()" class="p-3 border-2 border-blue-200 rounded-2xl font-black">
                 <div id="lockBtnArea"></div>
             </div>
-
             <div class="overflow-x-auto">
                 <table id="mainTable" class="w-full text-center border-collapse">
                     <thead class="bg-slate-900 text-white">
@@ -155,7 +92,6 @@
                     <tbody id="scheduleBody"></tbody>
                 </table>
             </div>
-
             <div class="print-only print-sig-container">
                 <table class="print-sig-table">
                     <tr>
@@ -167,7 +103,6 @@
         </main>
     </div>
 
-    <!-- MODAL CÁN BỘ (GIỮ NGUYÊN) -->
     <div id="staffModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-[50] backdrop-blur-md">
         <div class="bg-white w-full max-w-5xl rounded-[3rem] p-10 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between mb-8 border-b-2 pb-6"><h3 class="text-3xl font-black text-blue-900 uppercase w-full text-center italic">Danh sách cán bộ nghiệp vụ</h3><button onclick="closeStaffModal()" class="text-4xl font-bold">&times;</button></div>
@@ -184,7 +119,7 @@
                         <select id="cbGroup" class="p-4 border-2 rounded-2xl font-bold bg-white text-base">
                             <option value="Lãnh đạo">Lãnh đạo</option><option value="Chỉ huy">Chỉ huy Đội</option><option value="Trực ban">Trực ban</option>
                         </select>
-                        <button id="btnSaveStaff" onclick="handleStaffSave()" class="col-span-2 bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl mt-2 transition-all">LƯU THÔNG TIN</button>
+                        <button id="btnSaveStaff" onclick="handleStaffSave()" class="col-span-2 bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl mt-2">LƯU THÔNG TIN</button>
                         <button id="btnCancelEdit" onclick="cancelEditStaff()" class="col-span-2 bg-slate-400 text-white font-black py-2 rounded-2xl hidden">HỦY CHỈNH SỬA</button>
                     </div>
                 </div>
@@ -198,7 +133,6 @@
         </div>
     </div>
 
-    <!-- MODAL ĐÁNH GIÁ (GIỮ NGUYÊN) -->
     <div id="evalModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-[60] backdrop-blur-md">
         <div class="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl border-t-8 border-green-600">
             <h3 class="font-black text-2xl mb-8 text-blue-900 border-b pb-4 text-center italic underline">Đánh giá ngày <span id="evalDateText"></span></h3>
@@ -206,8 +140,8 @@
                 <div><label class="block font-black text-sm mb-2 text-slate-600 uppercase">Kết quả ca trực:</label><select id="evalRes" class="w-full p-4 border-2 rounded-2xl font-black bg-slate-50 text-lg"><option value="Đạt">✅ Đạt yêu cầu</option><option value="Không đạt">❌ Không đạt</option></select></div>
                 <div><label class="block font-black text-sm mb-2 text-slate-600 uppercase">Nhận xét chi tiết:</label><textarea id="evalReason" class="w-full p-4 border-2 rounded-2xl h-32 outline-none bg-slate-50 font-bold text-lg"></textarea></div>
                 <div class="flex gap-4">
-                    <button id="btnDeXuat" onclick="saveEval('Đề xuất')" class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-black shadow-xl transition-all">ĐỀ XUẤT</button>
-                    <button id="btnDuyet" onclick="saveEval('Đã duyệt')" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-xl hidden transition-all">PHÊ DUYỆT</button>
+                    <button id="btnDeXuat" onclick="saveEval('Đề xuất')" class="flex-1 bg-amber-500 text-white py-4 rounded-2xl font-black shadow-xl">ĐỀ XUẤT</button>
+                    <button id="btnDuyet" onclick="saveEval('Đã duyệt')" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-xl hidden">PHÊ DUYỆT</button>
                     <button onclick="closeEvalModal()" class="flex-1 bg-slate-200 py-4 rounded-2xl font-black text-slate-700">HỦY</button>
                 </div>
             </div>
@@ -229,6 +163,7 @@
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('mainPage').classList.remove('hidden');
                     document.getElementById('userTag').innerText = `Người thực hiện: ${user.toUpperCase()} (${role})`;
+                    if(['Trưởng phòng', 'Phó Trưởng phòng'].includes(role)) document.getElementById('btnApproveAll').classList.remove('hidden');
                     const t = new Date(); const lastWed = new Date(t.setDate(t.getDate() - (t.getDay() + 3) % 7));
                     document.getElementById('weekStart').value = lastWed.toISOString().split('T')[0];
                     fetchAll();
@@ -299,6 +234,14 @@
 
         async function deleteCb(name) { if(!confirm(`Xóa cán bộ ${name}?`)) return; showL(true); await fetch(`${API}?action=deleteCanBo&name=${encodeURIComponent(name)}`); fetchAll(); }
 
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return "Tuần " + weekNo + " - " + d.getUTCFullYear();
+        }
+
         function loadWeek(){
             const startVal = document.getElementById('weekStart').value; if(!startVal) return;
             const start = new Date(startVal); const end = new Date(start); end.setDate(start.getDate() + 7);
@@ -315,25 +258,29 @@
                 const cOpts = allCanBo.filter(c => c.group === "Chỉ huy").map(c => `<option ${saved.commander.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
                 const dOpts = allCanBo.filter(c => c.group === "Trực ban").map(c => `<option ${saved.duty.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
                 const isAuth = (role === 'Trưởng phòng' && !isLocked); const dayLab = d.getDay() === 0 ? "Chủ Nhật" : `Thứ ${d.getDay() + 1}`;
-                tbody.innerHTML += `
-                    <tr class="border-b-2 hover:bg-slate-50">
-                        <td class="p-5 border font-black text-sm bg-slate-50">${dayLab}<br>${ds}</td>
-                        <td class="p-1 border">${isLocked?`<b>${saved.leader}</b>`:`<select id="l_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${lOpts}</select>`}</td>
-                        <td class="p-1 border">${isLocked?`<b>${saved.commander}</b>`:`<select id="c_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${cOpts}</select>`}</td>
-                        <td class="p-1 border">${isLocked?`<b>${saved.duty}</b>`:`<select id="d_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${dOpts}</select>`}</td>
-                        <td class="p-1 border eval-col bg-slate-50">
-                            <div class="cursor-pointer px-1 py-3" onclick="openEval('${ds}')">
-                                <span class="font-black text-sm ${ev.res === 'Đạt' ? 'text-green-600' : 'text-red-600'}">${ev.res}</span><br>
-                                <span class="text-[10px] italic text-slate-400 font-black no-print">${ev.status || '(Bấm để ĐG)'}</span>
-                                <div class="eval-reason-print">${ev.reason || ''}</div>
-                            </div>
-                        </td>
-                        <td class="p-1 border no-print"><button onclick="saveRow(${i}, '${ds}')" ${isAuth?'':'disabled'} class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg">Lưu</button></td>
-                    </tr>`;
+                tbody.innerHTML += `<tr class="border-b-2 hover:bg-slate-50"><td class="p-5 border font-black text-sm bg-slate-50">${dayLab}<br>${ds}</td><td class="p-1 border">${isLocked?`<b>${saved.leader}</b>`:`<select id="l_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${lOpts}</select>`}</td><td class="p-1 border">${isLocked?`<b>${saved.commander}</b>`:`<select id="c_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${cOpts}</select>`}</td><td class="p-1 border">${isLocked?`<b>${saved.duty}</b>`:`<select id="d_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${dOpts}</select>`}</td><td class="p-1 border eval-col bg-slate-50"><div class="cursor-pointer px-1 py-3" onclick="openEval('${ds}')"><span class="font-black text-sm ${ev.res === 'Đạt' ? 'text-green-600' : 'text-red-600'}">${ev.res}</span><br><span class="text-[10px] italic text-slate-400 font-black no-print">${ev.status || '(Bấm để ĐG)'}</span><div class="eval-reason-print">${ev.reason || ''}</div></div></td><td class="p-1 border no-print"><button onclick="saveRow(${i}, '${ds}')" ${isAuth?'':'disabled'} class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg">Lưu</button></td></tr>`;
             }
         }
 
-        async function saveRow(i, date){ const data = [{ date: date, leader: document.getElementById(`l_${i}`).value, commander: document.getElementById(`c_${i}`).value, duty: document.getElementById(`d_${i}`).value }]; showL(true); await fetch(`${API}?action=saveBatch&data=${encodeURIComponent(JSON.stringify(data))}&user=${user}`); fetchAll(); }
+        async function saveRow(i, date){ 
+            const weekLab = getWeekNumber(new Date(document.getElementById('weekStart').value));
+            const data = [{ date: date, leader: document.getElementById(`l_${i}`).value, commander: document.getElementById(`c_${i}`).value, duty: document.getElementById(`d_${i}`).value }]; 
+            showL(true); await fetch(`${API}?action=saveBatch&data=${encodeURIComponent(JSON.stringify(data))}&user=${user}&weekLabel=${encodeURIComponent(weekLab)}`); fetchAll(); 
+        }
+
+        async function saveAllRows(){
+            const weekLab = getWeekNumber(new Date(document.getElementById('weekStart').value));
+            const data = [];
+            const rows = document.getElementById('scheduleBody').rows;
+            for(let i=0; i<7; i++){
+                const dateText = rows[i].cells[0].innerText.split('\n')[1];
+                data.push({ date: dateText, leader: document.getElementById(`l_${i}`).value, commander: document.getElementById(`c_${i}`).value, duty: document.getElementById(`d_${i}`).value });
+            }
+            if(confirm("Phê duyệt toàn bộ lịch trực cho " + weekLab + "?")) {
+                showL(true); await fetch(`${API}?action=saveBatch&data=${encodeURIComponent(JSON.stringify(data))}&user=${user}&weekLabel=${encodeURIComponent(weekLab)}`); fetchAll();
+            }
+        }
+
         let curEvDate = ""; function openEval(date){ if(role === "Trực ban") return; curEvDate = date; document.getElementById('evalDateText').innerText = date; const ev = schFull.evals[date] || { res: "Đạt", reason: "" }; document.getElementById('evalRes').value = ev.res === "Chưa ĐG" ? "Đạt" : ev.res; document.getElementById('evalReason').value = ev.reason; document.getElementById('btnDeXuat').classList.toggle('hidden', role !== 'Tổ trưởng Điều lệnh'); document.getElementById('btnDuyet').classList.toggle('hidden', !['Trưởng phòng', 'Phó Trưởng phòng'].includes(role)); document.getElementById('evalModal').classList.remove('hidden'); }
         async function saveEval(st){ const res = document.getElementById('evalRes').value, rea = document.getElementById('evalReason').value; showL(true); await fetch(`${API}?action=saveEval&date=${curEvDate}&result=${res}&reason=${encodeURIComponent(rea)}&status=${st}&user=${user}`); closeEvalModal(); fetchAll(); }
         async function lockW(k){ if(confirm("Xác nhận chốt lịch toàn đơn vị?")) { showL(true); await fetch(`${API}?action=lockWeek&weekKey=${k}&user=${user}`); fetchAll(); } }
@@ -343,7 +290,7 @@
             document.body.classList.remove('landscape-mode', 'portrait-mode');
             document.body.classList.add(mode + '-mode');
             const style = document.createElement('style');
-            style.innerHTML = `@page { size: A4 landscape; }`; // Ép ngang mặc định
+            style.innerHTML = `@page { size: A4 landscape; }`;
             document.head.appendChild(style);
             if(type === 'lich') {
                 document.body.classList.remove('show-eval');
