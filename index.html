@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống PV06 - v1.0</title>
+    <title>Hệ Thống PV06 - Pro v4.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -34,7 +34,7 @@
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
-    <div id="loader" class="fixed inset-0 bg-white/80 z-[9999] flex flex-col items-center justify-center hidden">
+    <div id="loader" class="fixed inset-0 bg-white/90 z-[9999] flex flex-col items-center justify-center hidden">
         <div class="loader mb-3"></div>
         <p class="font-black text-blue-900 italic">Đang đồng bộ nghiệp vụ PV06...</p>
     </div>
@@ -69,7 +69,7 @@
                 <h3 class="font-bold uppercase text-lg">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
                 <h4 class="font-bold text-md">Độc lập - Tự do - Hạnh phúc</h4>
                 <div class="w-32 h-px bg-black mx-auto mt-1"></div>
-                <h2 id="printTitle" class="mt-6 font-black text-2xl uppercase ">LỊCH TRỰC TUẦN</h2>
+                <h2 id="printTitle" class="mt-6 font-black text-2xl uppercase">LỊCH TRỰC TUẦN</h2>
                 <p id="printTimeRange" class="italic font-bold text-lg mt-1"></p>
             </div>
             <div class="flex flex-wrap items-center gap-4 mb-10 no-print bg-blue-50 p-6 rounded-3xl border-2 border-blue-100">
@@ -117,14 +117,12 @@
                         </select>
                         <select id="cbPos" class="p-4 border-2 rounded-2xl font-bold bg-white text-base">
                             <option value="">-- Chức vụ --</option>
-                            <option value="Trưởng Phòng">Trưởng Phòng</option>
-                            <option value="Phó Trưởng Phòng">Phó Trưởng Phòng</option>
-                            <option value="Đội Trưởng">Đội Trưởng</option>
-                            <option value="Phó Đội Trưởng">Phó Đội Trưởng</option>
-                            <option value="Cán Bộ">Cán Bộ</option>
+                            <option value="Trưởng Phòng">Trưởng Phòng</option><option value="Phó Trưởng Phòng">Phó Trưởng Phòng</option><option value="Đội Trưởng">Đội Trưởng</option><option value="Phó Đội Trưởng">Phó Đội Trưởng</option><option value="Cán Bộ">Cán Bộ</option>
                         </select>
                         <select id="cbGroup" class="p-4 border-2 rounded-2xl font-bold bg-white text-base">
-                            <option value="Lãnh đạo">Lãnh đạo</option><option value="Chỉ huy">Chỉ huy Đội</option><option value="Trực ban">Trực ban</option>
+                            <option value="Lãnh đạo">Lãnh đạo</option>
+                            <option value="Chỉ huy Đội trực">Chỉ huy Đội trực</option>
+                            <option value="Trực ban">Trực ban</option>
                         </select>
                         <button id="btnSaveStaff" onclick="handleStaffSave()" class="col-span-2 bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl mt-2 transition-all">LƯU THÔNG TIN</button>
                         <button id="btnCancelEdit" onclick="cancelEditStaff()" class="col-span-2 bg-slate-400 text-white font-black py-2 rounded-2xl hidden">HỦY CHỈNH SỬA</button>
@@ -229,7 +227,12 @@
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
-                const staffList = jsonData.slice(1).filter(row => row[0]).map(row => ({ name: row[1] || "", rank: row[2] || "", pos: row[3] || "Cán Bộ", group: row[4] || "Trực ban" }));
+                const staffList = jsonData.slice(1).filter(row => row[1]).map(row => ({ 
+                    name: row[1] || "", 
+                    rank: row[2] || "", 
+                    pos: row[3] || "Cán Bộ", 
+                    group: row[4] || "Trực ban" 
+                }));
                 if(confirm(`Phát hiện ${staffList.length} cán bộ. Bắt đầu nhập?`)) {
                     showL(true); await fetch(`${API}?action=batchAddCanBo&data=${encodeURIComponent(JSON.stringify(staffList))}`);
                     fetchAll();
@@ -261,9 +264,12 @@
                 const d = new Date(start); d.setDate(start.getDate() + i); const ds = d.toLocaleDateString('vi-VN');
                 const saved = schFull.shifts[ds] || { leader: "--", commander: "--", duty: "--" };
                 const ev = schFull.evals[ds] || { res: "Chưa ĐG", reason: "", status: "" };
+                
                 const lOpts = allCanBo.filter(c => c.group === "Lãnh đạo").map(c => `<option ${saved.leader.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
-                const cOpts = allCanBo.filter(c => c.group === "Chỉ huy").map(c => `<option ${saved.commander.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
+                // SỬA: Đồng bộ tên nhóm lọc là "Chỉ huy Đội trực"
+                const cOpts = allCanBo.filter(c => c.group === "Chỉ huy Đội trực").map(c => `<option ${saved.commander.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
                 const dOpts = allCanBo.filter(c => c.group === "Trực ban").map(c => `<option ${saved.duty.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
+                
                 const isAuth = (role === 'Trưởng phòng' && !isLocked); const dayLab = d.getDay() === 0 ? "Chủ Nhật" : `Thứ ${d.getDay() + 1}`;
                 tbody.innerHTML += `<tr class="border-b-2 hover:bg-slate-50"><td class="p-5 border font-black text-sm bg-slate-50">${dayLab}<br>${ds}</td><td class="p-1 border">${isLocked?`<b>${saved.leader}</b>`:`<select id="l_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${lOpts}</select>`}</td><td class="p-1 border">${isLocked?`<b>${saved.commander}</b>`:`<select id="c_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${cOpts}</select>`}</td><td class="p-1 border">${isLocked?`<b>${saved.duty}</b>`:`<select id="d_${i}" class="w-full text-center text-sm font-bold p-3 bg-transparent outline-none" ${isAuth?'':'disabled'}>${dOpts}</select>`}</td><td class="p-1 border eval-col bg-slate-50"><div class="cursor-pointer px-1 py-3" onclick="openEval('${ds}')"><span class="font-black text-sm ${ev.res === 'Đạt' ? 'text-green-600' : 'text-red-600'}">${ev.res}</span><br><span class="text-[10px] italic text-slate-400 font-black no-print">${ev.status || '(Bấm để ĐG)'}</span><div class="eval-reason-print">${ev.reason || ''}</div></div></td><td class="p-1 border no-print"><button onclick="saveRow(${i}, '${ds}')" ${isAuth?'':'disabled'} class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-lg">Lưu</button></td></tr>`;
             }
