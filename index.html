@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống PV06 - Pro v4.3</title>
+    <title>Hệ Thống PV06 - Pro v4.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -164,7 +164,8 @@
             try {
                 const res = await fetch(`${API}?action=login&username=${u}&password=${p}`).then(r => r.json());
                 if(res.success){
-                    user = u; role = res.role;
+                    user = res.name; 
+                    role = res.role;
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('mainPage').classList.remove('hidden');
                     document.getElementById('userTag').innerText = `Người thực hiện: ${user.toUpperCase()} (${role})`;
@@ -172,8 +173,8 @@
                     const t = new Date(); const lastWed = new Date(t.setDate(t.getDate() - (t.getDay() + 3) % 7));
                     document.getElementById('weekStart').value = lastWed.toISOString().split('T')[0];
                     fetchAll();
-                } else { showL(false); alert("Sai mật khẩu!"); }
-            } catch(e) { showL(false); alert("Lỗi kết nối!"); }
+                } else { showL(false); alert("Sai tài khoản hoặc mật khẩu! Vui lòng thử lại."); }
+            } catch(e) { showL(false); alert("Lỗi kết nối máy chủ!"); }
         }
 
         async function fetchAll(){
@@ -266,7 +267,6 @@
                 const ev = schFull.evals[ds] || { res: "Chưa ĐG", reason: "", status: "" };
                 
                 const lOpts = allCanBo.filter(c => c.group === "Lãnh đạo").map(c => `<option ${saved.leader.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
-                // SỬA: Đồng bộ tên nhóm lọc là "Chỉ huy Đội trực"
                 const cOpts = allCanBo.filter(c => c.group === "Chỉ huy Đội trực").map(c => `<option ${saved.commander.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
                 const dOpts = allCanBo.filter(c => c.group === "Trực ban").map(c => `<option ${saved.duty.includes(c.name)?'selected':''}>${c.rank} ${c.name}</option>`).join('');
                 
@@ -294,7 +294,19 @@
             }
         }
 
-        let curEvDate = ""; function openEval(date){ if(role === "Trực ban") return; curEvDate = date; document.getElementById('evalDateText').innerText = date; const ev = schFull.evals[date] || { res: "Đạt", reason: "" }; document.getElementById('evalRes').value = ev.res === "Chưa ĐG" ? "Đạt" : ev.res; document.getElementById('evalReason').value = ev.reason; document.getElementById('btnDeXuat').classList.toggle('hidden', role !== 'Tổ trưởng Điều lệnh'); document.getElementById('btnDuyet').classList.toggle('hidden', !['Trưởng phòng', 'Phó Trưởng phòng'].includes(role)); document.getElementById('evalModal').classList.remove('hidden'); }
+        let curEvDate = ""; 
+        function openEval(date){ 
+            if(role === "Trực ban") return; 
+            curEvDate = date; 
+            document.getElementById('evalDateText').innerText = date; 
+            const ev = schFull.evals[date] || { res: "Đạt", reason: "" }; 
+            document.getElementById('evalRes').value = ev.res === "Chưa ĐG" ? "Đạt" : ev.res; 
+            document.getElementById('evalReason').value = ev.reason; 
+            document.getElementById('btnDeXuat').classList.toggle('hidden', role !== 'Điều lệnh'); 
+            document.getElementById('btnDuyet').classList.toggle('hidden', !['Trưởng phòng', 'Phó Trưởng phòng'].includes(role)); 
+            document.getElementById('evalModal').classList.remove('hidden'); 
+        }
+        
         async function saveEval(st){ const res = document.getElementById('evalRes').value, rea = document.getElementById('evalReason').value; showL(true); await fetch(`${API}?action=saveEval&date=${curEvDate}&result=${res}&reason=${encodeURIComponent(rea)}&status=${st}&user=${user}`); closeEvalModal(); fetchAll(); }
         async function lockW(k){ if(confirm("Xác nhận chốt lịch toàn đơn vị?")) { showL(true); await fetch(`${API}?action=lockWeek&weekKey=${k}&user=${user}`); fetchAll(); } }
         async function unlockW(k){ if(confirm("Mở khóa chỉnh sửa lịch?")) { showL(true); await fetch(`${API}?action=unlockWeek&weekKey=${k}&user=${user}`); fetchAll(); } }
