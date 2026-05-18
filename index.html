@@ -29,23 +29,152 @@
         }
         .print-only { display: none; }
         .eval-reason-print { display: none; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #22c55e; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- BẮT ĐẦU CSS CYBER THEME XANH LÁ HACKER --- */
+        
+        /* Hiệu ứng gõ chữ Typing lặp vô tận */
+        @keyframes typing { 
+            0%, 10% { width: 0; }       
+            40%, 60% { width: 100%; }   
+            90%, 100% { width: 0; }     
+        }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #22c55e } } /* Đổi màu con trỏ sang xanh lá */
+        
+        .typing-text {
+            overflow: hidden;
+            border-right: .15em solid #22c55e; /* Màu con trỏ gõ chữ */
+            white-space: nowrap;
+            letter-spacing: .1em;
+            animation: typing 7s steps(40, end) infinite, blink-caret .75s step-end infinite;
+            width: 0;
+            display: inline-block;
+        }
+
+        /* 1. Hiệu ứng Tia Laser (Laser Sweep) - Chốt 8s */
+        @keyframes shine {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+        .laser-sweep {
+            /* Đã chuyển dải sáng điểm nhấn sang màu xanh lá dạ quang #4ade80 */
+            background: linear-gradient(90deg, #cbd5e1 0%, #cbd5e1 40%, #ffffff 50%, #4ade80 55%, #cbd5e1 60%, #cbd5e1 100%);
+            background-size: 300% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 8s infinite linear;
+        }
+
+        /* Lưới Cyber Grid */
+        .cyber-grid {
+            background-image: 
+                linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
+        }
+
+        /* Khối màu bay Slow Gradient Blobs */
+        @keyframes blob-bounce {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 30px) scale(0.9); }
+        }
+        
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.25;
+            animation: blob-bounce 15s infinite alternate ease-in-out;
+            z-index: 0;
+        }
+
+        /* Form Kính mờ Glassmorphism */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7) !important;
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(34, 197, 94, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* Hiệu ứng Glow khi nhấp vào ô nhập */
+        .cyber-input {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #4ade80 !important; /* Đổi màu chữ gõ vào thành xanh lá sáng */
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+        .cyber-input:focus {
+            outline: none;
+            border-color: #22c55e !important; /* Xanh lá sáng */
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.05) !important;
+        }
+
+        /* Nút bấm Cyber Xanh Lá */
+        .cyber-btn {
+            background: linear-gradient(135deg, #166534, #15803d) !important;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-btn:hover {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* --- KẾT THÚC CSS CYBER --- */
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
     <div id="loader" class="fixed inset-0 bg-white/90 z-[9999] flex flex-col items-center justify-center hidden">
-        <div class="loader mb-3"></div>
-        <p class="font-black text-blue-900 italic">Đang đồng bộ dữ liệu...</p>
+        <div class="loader mb-3 border-t-green-500"></div>
+        <p class="font-black text-green-700 italic">Đang đồng bộ dữ liệu...</p>
     </div>
 
-    <div id="loginPage" class="flex items-center justify-center min-h-screen bg-slate-900 px-4">
-        <div class="bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-700">
-            <h1 class="text-3xl font-black text-center text-blue-900 mb-2 uppercase italic">Phòng Hồ Sơ Nghiệp Vụ</h1>
-            <p class="text-center text-slate-500 mb-10 font-bold italic">Hệ Thống Trực Ban & Đánh Giá</p>
-            <input type="text" id="user" class="w-full p-4 border rounded-2xl mb-4 outline-none font-bold text-lg" placeholder="Tài khoản">
-            <input type="password" id="pass" class="w-full p-4 border rounded-2xl mb-8 outline-none font-bold text-lg" placeholder="Mật khẩu">
-            <button onclick="login()" class="w-full bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl text-xl">ĐĂNG NHẬP</button>
+    <div id="loginPage" class="flex items-center justify-center min-h-screen bg-slate-950 px-4 relative overflow-hidden">
+        
+        <div class="blob bg-green-600 w-96 h-96 -top-20 -left-20"></div>
+        <div class="blob bg-emerald-700 w-80 h-80 -bottom-10 -right-10 animation-delay-2000"></div>
+        <div class="blob bg-teal-800 w-60 h-60 top-1/2 left-1/2 animation-delay-4000"></div>
+        
+        <div class="absolute inset-0 cyber-grid z-10"></div>
+        
+        <canvas id="matrixCanvas" class="absolute inset-0 z-10 opacity-50"></canvas>
+
+        <div class="glass-panel p-10 sm:p-12 rounded-[2.5rem] w-full max-w-lg border-t-8 border-green-600 relative z-20 transition-all duration-500 hover:border-green-400">
+            
+            <div class="mb-10 flex flex-col items-center">
+                <div class="h-10 flex items-center justify-center w-full">
+                    <h1 class="text-3xl font-black text-center text-green-400 uppercase italic typing-text">Phòng Hồ Sơ Nghiệp Vụ</h1>
+                </div>
+                <p class="text-center mt-3 font-bold italic tracking-wide laser-sweep">Hệ Thống Trực Ban & Đánh Giá</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="relative group">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-400">👤</span>
+                    <input type="text" id="user" class="cyber-input w-full p-5 pl-14 border rounded-2xl outline-none font-bold text-xl placeholder:font-normal placeholder:italic placeholder:text-base" placeholder="Nhập tài khoản chỉ huy">
+                </div>
+                
+                <div class="relative group">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-400">🔑</span>
+                    <input type="password" id="pass" class="cyber-input w-full p-5 pl-14 border rounded-2xl outline-none font-bold text-xl placeholder:font-normal placeholder:italic placeholder:text-base" placeholder="Nhập mật khẩu PV06">
+                </div>
+            </div>
+            
+            <button onclick="login()" class="cyber-btn w-full text-white font-black py-5 rounded-2xl shadow-xl text-2xl mt-10 uppercase tracking-wider">
+                Xác thực Nghiệp vụ
+            </button>
         </div>
     </div>
 
@@ -157,6 +286,35 @@
         const API = "https://script.google.com/macros/s/AKfycbwOb7WE8OY6EM229CwII4L87Gt8iTcQgW5TcKfm1pB9XzIyAjIdIp0oZdE29mq9O5yx/exec";
         let user = "", role = "", allCanBo = [], schFull = {}, editMode = false, currentOldName = "";
         function showL(s){ document.getElementById('loader').classList.toggle('hidden', !s); }
+
+        // JS Cyber
+        function initMatrix() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const letters = "0101010101010101"; 
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = [];
+            for (let i = 0; i < columns; i++) drops[i] = 1;
+            function draw() {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // ĐÃ ĐỔI MÃ MÀU MA TRẬN SANG XANH LÁ CHUẨN: #00ff41
+                ctx.fillStyle = "#00ff41"; 
+                ctx.font = fontSize + "px monospace";
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            setInterval(draw, 33);
+        }
+
+        window.addEventListener('load', () => { initMatrix(); });
 
         async function login(){
             const u = document.getElementById('user').value, p = document.getElementById('pass').value;
